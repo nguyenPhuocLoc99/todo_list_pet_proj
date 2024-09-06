@@ -1,0 +1,57 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorator';
+import { JwtGuard } from 'src/auth/guard';
+import { EditUserDto, UserDto } from './dto';
+import { UserService } from './user.service';
+
+@UseGuards(JwtGuard)
+@Controller('users')
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get('me')
+  getMe(@GetUser() user: User) {
+    return user;
+  }
+
+  @Get(':id')
+  getUserById(
+    @GetUser('is_admin') is_admin: boolean,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.userService.getUserById(id, is_admin);
+  }
+
+  @Post('create')
+  createUser(@GetUser('is_admin') is_admin: boolean, @Body() dto: UserDto) {
+    return this.userService.createUser(dto, is_admin);
+  }
+
+  @Patch(':id')
+  editUserById(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: EditUserDto,
+    @GetUser('is_admin') is_admin: boolean,
+  ) {
+    return this.userService.editUserById(id, dto, is_admin);
+  }
+
+  @Delete(':id')
+  deleteUserById(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser('is_admin') is_admin: boolean,
+  ) {
+    return this.userService.deleteUserById(id, is_admin);
+  }
+}
