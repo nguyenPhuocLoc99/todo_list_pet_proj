@@ -27,14 +27,14 @@ export class UserController {
 
   @Get(':id')
   getUserById(
-    @GetUser('is_admin') is_admin: boolean,
+    @GetUser('isAdmin') is_admin: boolean,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.userService.getUserById(id, is_admin);
   }
 
   @Post('create')
-  createUser(@GetUser('is_admin') is_admin: boolean, @Body() dto: UserDto) {
+  createUser(@GetUser('isAdmin') is_admin: boolean, @Body() dto: UserDto) {
     return this.userService.createUser(dto, is_admin);
   }
 
@@ -42,7 +42,7 @@ export class UserController {
   editUserById(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: EditUserDto,
-    @GetUser('is_admin') is_admin: boolean,
+    @GetUser('isAdmin') is_admin: boolean,
   ) {
     return this.userService.editUserById(id, dto, is_admin);
   }
@@ -50,7 +50,7 @@ export class UserController {
   @Delete(':id')
   deleteUserById(
     @Param('id', ParseIntPipe) id: number,
-    @GetUser('is_admin') is_admin: boolean,
+    @GetUser('isAdmin') is_admin: boolean,
   ) {
     return this.userService.deleteUserById(id, is_admin);
   }

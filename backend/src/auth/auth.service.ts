@@ -22,16 +22,16 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data: {
-          login_name: dto.login_name,
+          loginName: dto.login_name,
           name: dto.name,
           hash,
           email: dto.email,
           phone: dto.phone,
-          other_contacts: dto.other_contacts,
+          otherContacts: dto.other_contacts,
         },
       });
 
-      return this.signToken(user.user_id, user.login_name);
+      return this.signToken(user.id, user.loginName);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -46,7 +46,7 @@ export class AuthService {
     // find user by email
     const user = await this.prisma.user.findUnique({
       where: {
-        login_name: dto.login_name,
+        loginName: dto.login_name,
       },
     });
     // throw exception if the user does not exist
@@ -58,7 +58,7 @@ export class AuthService {
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
 
     // send back the user
-    return this.signToken(user.user_id, user.login_name);
+    return this.signToken(user.id, user.loginName);
   }
 
   async signToken(

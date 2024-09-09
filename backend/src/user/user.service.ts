@@ -12,22 +12,27 @@ import * as argon from 'argon2';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  getUserById(userId: number, is_admin: boolean) {
-    if (!is_admin)
+  async getUserById(userId: number, isAdmin: boolean) {
+    if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
-    return this.prisma.user.findFirst({
+
+    const user = await this.prisma.user.findFirst({
       where: {
-        user_id: userId,
+        id: userId,
       },
     });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return user;
   }
 
-  async createUser(dto: UserDto, is_admin: boolean) {
-    if (!is_admin)
+  async createUser(dto: UserDto, isAdmin: boolean) {
+    if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
     const user = await this.prisma.user.findFirst({
       where: {
-        login_name: dto.login_name,
+        loginName: dto.login_name,
       },
     });
 
@@ -37,25 +42,25 @@ export class UserService {
 
     await this.prisma.user.create({
       data: {
-        login_name: dto.login_name,
+        loginName: dto.login_name,
         hash,
         name: dto.name,
         email: dto.email,
         phone: dto.phone,
-        other_contacts: dto.other_contacts,
-        is_admin: dto.is_admin,
+        otherContacts: dto.other_contacts,
+        isAdmin: dto.is_admin,
       },
     });
     return { message: 'User created' };
   }
 
-  async editUserById(userid: number, dto: EditUserDto, is_admin: boolean) {
-    if (!is_admin)
+  async editUserById(userid: number, dto: EditUserDto, isAdmin: boolean) {
+    if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
 
     const user = await this.prisma.user.findFirst({
       where: {
-        user_id: userid,
+        id: userid,
       },
     });
 
@@ -69,7 +74,7 @@ export class UserService {
 
     return this.prisma.user.update({
       where: {
-        user_id: userid,
+        id: userid,
       },
       data: {
         ...dto,
@@ -77,13 +82,13 @@ export class UserService {
     });
   }
 
-  async deleteUserById(userId: number, is_admin: boolean) {
-    if (!is_admin)
+  async deleteUserById(userId: number, isAdmin: boolean) {
+    if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
 
     await this.prisma.user.delete({
       where: {
-        user_id: userId,
+        id: userId,
       },
     });
   }
