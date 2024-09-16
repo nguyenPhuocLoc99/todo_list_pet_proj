@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class AuthSignUpDto {
   @IsString()
@@ -37,3 +43,38 @@ export class AuthLoginDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class AccessControlDto {
+  permissons: object;
+  userId: number;
+}
+
+// export class PermissionDto {
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowInProgress: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowReview: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   isReviewer: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowCancel: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowReassign: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowUpdateAccess: boolean;
+
+//   @IsBoolean()
+//   @IsNotEmpty()
+//   allowUpdateInfo: boolean;
+// }

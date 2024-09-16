@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Permission } from '@prisma/client';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateTaskGroupDto {
   @IsString()
@@ -26,4 +33,13 @@ export class EditTaskGroupDto {
   @IsArray()
   @IsOptional()
   taskIds?: number[];
+}
+
+export class GroupAccessDto {
+  @IsInt()
+  @IsOptional()
+  userId?: number;
+
+  @IsOptional()
+  permission?: Permission[];
 }

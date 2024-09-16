@@ -10,42 +10,95 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { GetUser } from 'src/auth/decorator';
-import { JwtGuard } from 'src/auth/guard';
-import { CreateTaskDto, EditTaskDto } from './dto';
+import { GetUser, Permissions } from 'src/auth/decorator';
+import { JwtGuard, PermissonsGuard } from 'src/auth/guard';
+import { CreateTaskDto, TaskAccessDto, EditTaskDto, LogworkDto } from './dto';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, PermissonsGuard)
 @Controller('tasks')
 export class TaskController {
   constructor(private taskService: TaskService) {}
 
   @Get(':id')
-  getTaskById(
-    @Param('id', ParseIntPipe) taskId: number,
-    @GetUser('id') userId: number,
-  ) {
-    return this.taskService.getTaskById(taskId, userId);
+  @Permissions('read')
+  getTaskById(@Param('id', ParseIntPipe) taskId: number) {
+    return this.taskService.getTaskById(taskId);
   }
 
   @Post('create')
-  createTask(@Body() dto: CreateTaskDto) {
-    return this.taskService.createTask(dto);
+  createTask(@Body() dto: CreateTaskDto, @GetUser('id') userId: number) {
+    return this.taskService.createTask(dto, userId);
   }
 
-  @Patch(':id')
+  @Post(':id/create')
+  @Permissions('updateAccess')
+  createTaskAccess(
+    @Param('id', ParseIntPipe) taskId: number,
+    @Body() dto: TaskAccessDto,
+  ) {
+    return this.taskService.createTaskAccess(taskId, dto);
+  }
+
+  @Patch(':id/info')
+  @Permissions(
+    'updateInfo',
+    'allowInProgress',
+    'allowReview',
+    'allowDone',
+    'allowCancel',
+    'allowReassignTask',
+  )
   editTaskById(
     @Param('id', ParseIntPipe) taskId: number,
-    @GetUser('id') userId: number,
     @Body() dto: EditTaskDto,
+    @GetUser('id') userId: number,
   ) {
-    return this.taskService.editTaskById(taskId, dto);
+    return this.taskService.editTaskById(taskId, dto, userId);
+  }
+
+  @Patch(':id/access')
+  @Permissions('updateAccess')
+  editTaskAccess(
+    @Param('id', ParseIntPipe) taskId: number,
+    @Body() dto: TaskAccessDto,
+  ) {
+    return this.taskService.editTaskAccess(taskId, dto);
   }
 
   @Delete(':id')
-  deleteTaskById(
+  @Permissions('delete')
+  deleteTaskById(@Param('id', ParseIntPipe) taskId: number) {
+    return this.taskService.deleteTaskById(taskId);
+  }
+
+  @Delete(':id/access')
+  @Permissions('updateAccess')
+  deleteTaskAccess(
+    @Param('id', ParseIntPipe) taskId: number,
+    @Body() dto: TaskAccessDto,
+  ) {
+    return this.taskService.deleteTaskAccess(taskId, dto);
+  }
+
+  @Get(':id/logwork')
+  @Permissions('read')
+  getLogworkById(@Param('id', ParseIntPipe) taskId: number) {
+    return this.taskService.getLogworkById(taskId);
+  }
+
+  @Post(':id/logwork')
+  @Permissions(
+    'allowInProgress',
+    'allowReview',
+    'allowDone',
+    'allowCancel',
+    'allowReassignTask',
+  )
+  logwork(
     @Param('id', ParseIntPipe) taskId: number,
     @GetUser('id') userId: number,
+    @Body() dto: LogworkDto,
   ) {
-    return this.taskService.deleteTaskById(taskId);
+    return this.taskService.logwork(taskId, userId, dto);
   }
 }

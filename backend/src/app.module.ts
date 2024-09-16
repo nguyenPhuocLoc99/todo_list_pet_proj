@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TaskModule } from './task/task.module';
 import { TaskGroupModule } from './task-group/task-group.module';
 import { ProfileModule } from './profile/profile.module';
+import { SearchToolsModule } from './search-tools/search-tools.module';
+import { PermissonsGuard } from './auth/guard/permissons.guard';
 
 @Module({
   imports: [
@@ -16,6 +18,7 @@ import { ProfileModule } from './profile/profile.module';
     TaskModule,
     TaskGroupModule,
     ProfileModule,
+    SearchToolsModule,
   ],
 })
 export class AppModule {}

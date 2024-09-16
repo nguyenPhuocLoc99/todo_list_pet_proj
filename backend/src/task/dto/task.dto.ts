@@ -1,4 +1,4 @@
-import { Status } from '@prisma/client';
+import { Permission, Status } from '@prisma/client';
 import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTaskDto {
@@ -63,4 +63,32 @@ export class EditTaskDto {
   @IsString()
   @IsOptional()
   dueTime?: string;
+}
+2;
+
+export class TaskAccessDto {
+  @IsInt()
+  @IsOptional()
+  userId?: number;
+
+  @IsOptional()
+  permission?: Permission[];
+}
+
+export class LogworkDto {
+  @IsString()
+  @IsNotEmpty()
+  timeSpent: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsString()
+  @IsOptional()
+  date?: string;
+
+  userId: number;
+
+  taskId: number;
 }

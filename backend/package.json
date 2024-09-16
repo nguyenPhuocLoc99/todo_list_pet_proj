@@ -7,6 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "dbstudio": "npx prisma studio",
+    "dockerup": "docker compose up dev-db -d",
+    "dbstart": "yarn dockerup && yarn dbstudio",
     "prisma:dev:migrate": "npx prisma migrate deploy",
     "prisma:dev:seed": "npx prisma db seed",
     "prisma:dev:deploy": "yarn prisma:dev:migrate && yarn prisma:dev:seed",
