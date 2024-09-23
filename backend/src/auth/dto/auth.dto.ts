@@ -9,7 +9,7 @@ import {
 export class AuthSignUpDto {
   @IsString()
   @IsNotEmpty()
-  login_name: string;
+  loginName: string;
 
   @IsString()
   @IsNotEmpty()
@@ -29,15 +29,15 @@ export class AuthSignUpDto {
 
   @IsString()
   @IsOptional()
-  other_contacts?: string;
+  otherContacts?: string;
 
-  is_admin: boolean = false;
+  isAdmin: boolean = false;
 }
 
 export class AuthLoginDto {
   @IsString()
   @IsNotEmpty()
-  login_name: string;
+  loginName: string;
 
   @IsString()
   @IsNotEmpty()

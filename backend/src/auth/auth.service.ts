@@ -9,6 +9,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -26,12 +27,12 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data: {
-          loginName: dto.login_name,
+          loginName: dto.loginName,
           name: dto.name,
           hash,
           email: dto.email,
           phone: dto.phone,
-          otherContacts: dto.other_contacts,
+          otherContacts: dto.otherContacts,
         },
       });
 
@@ -46,11 +47,11 @@ export class AuthService {
     }
   }
 
-  async login(dto: AuthLoginDto) {
-    // find user by email
+  async login(dto: AuthLoginDto, response: Response) {
+    // find user by loginName
     const user = await this.prisma.user.findUnique({
       where: {
-        loginName: dto.login_name,
+        loginName: dto.loginName,
       },
     });
     // throw exception if the user does not exist
@@ -62,13 +63,15 @@ export class AuthService {
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
 
     // send back the user
-    return this.signToken(user.id, user.loginName);
+    const data = await this.signToken(user.id, user.loginName);
+
+    return { token: data.accessToken };
   }
 
   async signToken(
     userId: number,
     login_name: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ accessToken: string }> {
     const payload = {
       subfield: userId,
       login_name,
@@ -80,6 +83,6 @@ export class AuthService {
     };
     const token = await this.jwt.signAsync(payload, signOptions);
 
-    return { access_token: token };
+    return { accessToken: token };
   }
 }
