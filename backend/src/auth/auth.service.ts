@@ -65,13 +65,13 @@ export class AuthService {
     // send back the user
     const data = await this.signToken(user.id, user.loginName);
 
-    return { token: data.accessToken };
+    return { accessToken: data.token };
   }
 
   async signToken(
     userId: number,
     login_name: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ token: string }> {
     const payload = {
       subfield: userId,
       login_name,
@@ -83,6 +83,6 @@ export class AuthService {
     };
     const token = await this.jwt.signAsync(payload, signOptions);
 
-    return { accessToken: token };
+    return { token: token };
   }
 }

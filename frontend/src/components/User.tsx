@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 const User = () => {
   const [user, setUser] = useState("");
+  const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -14,12 +16,16 @@ const User = () => {
         },
       });
       const content = await response.json();
+      const stringJson = JSON.stringify(content);
 
-      setUser(JSON.stringify(content));
+      if (content.id) setUser(stringJson);
+      else setRedirect(true);
     };
 
     fetchUser();
   });
+
+  if (redirect) return <Navigate to="/login" />;
 
   return <div>{user}</div>;
 };

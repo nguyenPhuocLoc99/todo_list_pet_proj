@@ -23,9 +23,11 @@ const Login = () => {
     });
     const data = await response.json();
 
-    sessionStorage.setItem("accessToken", data.token);
 
-    setRedirect(true);
+    if (data.accessToken) {
+      sessionStorage.setItem("accessToken", data.accessToken);
+      setRedirect(true);
+    }
   };
 
   if (redirect) return <Navigate to="/user" />;
