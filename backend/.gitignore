@@ -50,8 +50,8 @@ build/config\.gypi
 pnpm-lock.yaml
 
 # Prisma
-/prisma
+# /prisma
 
 # Others, added manually
 /dist
-/.env
+# /.env
