@@ -9,11 +9,15 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { EditUserDto, UserDto } from './dto';
 import { UserService } from './user.service';
+
+// try to fix a bug
+import * as runtime from '@prisma/client/runtime/library.js';
+type User = runtime.Types.Result.DefaultSelection<Prisma.$UserPayload>;
 
 @UseGuards(JwtGuard)
 @Controller('users')
