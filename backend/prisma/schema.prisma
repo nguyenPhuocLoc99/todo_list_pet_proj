@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DEPLOYED_DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  loginName String  @unique @db.VarChar(30)
+  name      String  @db.VarChar(50)
+  hash      String
+  isAdmin   Boolean @default(false)
+
+  email         String? @db.VarChar(50)
+  phone         String? @db.VarChar(10)
+  otherContacts String? @db.VarChar(50)
+
+  profileId     UserProfile?
+  tasks         Task[]
+  logwork       LogWork[]
+  accessControl AccessControl[]
+
+  @@map("users")
+}
+
+model Task {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  status   Status @default(toDo)
+  taskName String @db.VarChar()
+
+  description String?   @db.VarChar(500)
+  estimation  DateTime? @db.Time()
+  startTime   DateTime? @db.Timestamp()
+  dueTime     DateTime? @db.Timestamp()
+
+  groupId Int?
+  group   TaskGroup? @relation(fields: [groupId], references: [id])
+
+  assigneeId Int?
+  assignee   User? @relation(fields: [assigneeId], references: [id])
+
+  accessControl AccessControl[]
+
+  logWork LogWork[]
+
+  @@map("tasks")
+}
+
+enum Status {
+  toDo
+  inProgress
+  review
+  done
+  cancelled
+}
+
+model TaskGroup {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  groupName String @db.VarChar(50)
+
+  description String? @db.VarChar(500)
+
+  tasks Task[]
+
+  accessControl AccessControl[]
+
+  @@map("taskgroups")
+}
+
+model UserProfile {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  cvPath String @db.VarChar(100)
+  salary Int
+
+  onboardDate     DateTime? @default(now()) @db.Date
+  division        String?   @db.VarChar(50)
+  contractPath    String?   @db.VarChar(100)
+  remainingLeaves Float?
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  // temporal as there is no company table and benefits table yet
+  companyId Int?
+  benefits  Int?
+
+  @@map("userprofiles")
+}
+
+model LogWork {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  timeSpent DateTime @db.Time()
+
+  description String?   @db.VarChar(300)
+  date        DateTime? @db.Timestamp()
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  @@map("logwork")
+}
+
+model AccessControl {
+  id       Int      @id @default(autoincrement())
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  taskId Int?
+  task   Task? @relation(fields: [taskId], references: [id])
+
+  groupId Int?
+  group   TaskGroup? @relation(fields: [groupId], references: [id])
+
+  permission Permission[]
+
+  @@map("accesscontrol")
+}
+
+enum Permission {
+  // change status permissions
+  allowInProgress
+  allowReview
+  allowDone
+  allowCancel
+  allowReassignTask
+
+  // CRUD permissions
+  read
+  updateAccess
+  updateInfo
+  delete
+}
