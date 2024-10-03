@@ -26,12 +26,13 @@ export class PermissonsGuard implements CanActivate {
       return true;
     }
 
-    const paramId: number = parseInt(
-      context.switchToHttp().getRequest().params.id,
-    );
+    // Get request
+    const request = context.switchToHttp().getRequest();
+
+    const paramId: number = parseInt(request.params.id);
     if (Number.isNaN(paramId)) throw new BadRequestException('No id found');
 
-    const route: string = context.switchToHttp().getRequest().route.path;
+    const route: string = request.route.path;
     const isTask: boolean = route?.includes('tasks');
     const isGroup: boolean = route?.includes('groups');
 
@@ -39,7 +40,6 @@ export class PermissonsGuard implements CanActivate {
     if (!isTask && !isGroup) throw new BadRequestException('Give me 1 pls');
 
     // Get user permission info
-    const request = context.switchToHttp().getRequest();
     const userId = request.user['id'];
     const query = isTask
       ? { userId: userId, taskId: paramId }

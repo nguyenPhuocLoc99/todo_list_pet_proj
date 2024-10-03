@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthSignUpDto, AuthLoginDto } from './dto';
 import * as argon from 'argon2';
@@ -34,8 +31,9 @@ export class AuthService {
           otherContacts: dto.otherContacts,
         },
       });
+      const data = await this.signToken(user.id, user.loginName);
 
-      return this.signToken(user.id, user.loginName);
+      return { accessToken: data.token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

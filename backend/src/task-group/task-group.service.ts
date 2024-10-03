@@ -11,6 +11,7 @@ import { Permission } from '@prisma/client';
 export class TaskGroupService {
   constructor(private prisma: PrismaService) {}
 
+  // get Group by id
   getGroupById(groupId: number) {
     return this.prisma.taskGroup.findUnique({
       where: {
@@ -22,23 +23,48 @@ export class TaskGroupService {
     });
   }
 
-  async createGroup(dto: CreateTaskGroupDto, userId: number) {
-    if (dto.taskIds.length) {
-      const tasksList: Array<Object> = [];
-      for (const taskId of dto.taskIds) {
-        if (typeof taskId === 'number') {
-          const task = await this.prisma.task.findUnique({
-            where: {
-              id: taskId,
-            },
-          });
+  // get Groups list by user id
+  async getGroupsList(userId: number) {
+    const groupsList = await this.prisma.accessControl.findMany({
+      where: {
+        userId: userId,
+        group: {
+          isNot: null,
+        },
+      },
+      include: {
+        group: true,
+      },
+    });
+    return groupsList.map((group) => group.group);
+  }
 
-          if (task) tasksList.push({ id: task.id });
-        }
+  // get Group tasks list
+  getGroupTasksList(groupId: number) {
+    return this.prisma.task.findMany({
+      where: {
+        groupId: groupId,
+      },
+    });
+  }
+
+  // create Group
+  async createGroup(dto: CreateTaskGroupDto, userId: number) {
+    if (dto.taskNames) {
+      const taskNamesArray = dto.taskNames.split(`,[ ]?`);
+      const tasksList: Array<Object> = [];
+      for (const taskName of taskNamesArray) {
+        const task = await this.prisma.task.findFirst({
+          where: {
+            taskName,
+          },
+        });
+
+        if (task) tasksList.push({ id: task.id });
       }
 
-      dto['tasks'] = { connect: tasksList };
-      delete dto.taskIds;
+      dto['tasks'] = { set: tasksList };
+      delete dto.taskNames;
     }
 
     const newGroup = await this.prisma.taskGroup.create({
@@ -63,6 +89,7 @@ export class TaskGroupService {
     return { message: 'New task group created' };
   }
 
+  // create Group access
   async createGroupAccess(groupId: number, dto: GroupAccessDto) {
     const accesses = await this.prisma.accessControl.findFirst({
       where: {
@@ -91,24 +118,26 @@ export class TaskGroupService {
     return { message: 'New task group access created' };
   }
 
+  // edit Group by id
   async editGroupById(groupId: number, dto: EditTaskGroupDto) {
-    if (dto.taskIds.length) {
+    if (dto.taskNames) {
+      const taskNamesArray = dto.taskNames.split(`,[ ]?`);
       const tasksList: Array<Object> = [];
-      for (const taskId of dto.taskIds) {
-        if (typeof taskId === 'number') {
-          const task = await this.prisma.task.findUnique({
-            where: {
-              id: taskId,
-            },
-          });
+      for (const taskName of taskNamesArray) {
+        const task = await this.prisma.task.findFirst({
+          where: {
+            taskName,
+          },
+        });
 
-          if (task) tasksList.push({ id: task.id });
-        }
+        if (task) tasksList.push({ id: task.id });
       }
 
       dto['tasks'] = { set: tasksList };
-      delete dto.taskIds;
+    } else {
+      dto['tasks'] = { set: [] };
     }
+    delete dto.taskNames;
 
     return this.prisma.taskGroup.update({
       where: {
@@ -123,6 +152,7 @@ export class TaskGroupService {
     });
   }
 
+  // edit Group access
   async editGroupAccess(groupId: number, dto: GroupAccessDto) {
     const accesses = await this.prisma.accessControl.findFirst({
       where: {
@@ -150,6 +180,7 @@ export class TaskGroupService {
     return { message: 'Access updated' };
   }
 
+  // delete Group by id
   async deleteGroupById(groupId: number) {
     const group = await this.prisma.taskGroup.findUnique({
       where: {
@@ -167,6 +198,7 @@ export class TaskGroupService {
     return { message: 'Task group deleted' };
   }
 
+  // delete Group access
   async deleteGroupAccess(groupId: number, dto: GroupAccessDto) {
     const accesses = await this.prisma.accessControl.findFirst({
       where: {

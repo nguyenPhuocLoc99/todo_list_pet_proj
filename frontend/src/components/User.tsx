@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import Alert from "./Alert";
 
 const User = () => {
+  // Input states
   const [user, setUser] = useState("");
+
+  // Redirect to Login
   const [redirect, setRedirect] = useState(false);
+
+  // Get state from navigate for 'Login success' message
+  const location = useLocation();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -25,9 +32,24 @@ const User = () => {
     fetchUser();
   });
 
-  if (redirect) return <Navigate to="/login" />;
+  if (redirect)
+    return (
+      <Navigate
+        to="/login"
+        state={{ message: "Token expired", alertType: 3 }}
+      />
+    );
 
-  return <div>{user}</div>;
+  return (
+    <>
+      {location.state && (
+        <Alert alertType={location.state.alertType}>
+          {location.state.message}
+        </Alert>
+      )}
+      <div>{user}</div>
+    </>
+  );
 };
 
 export default User;

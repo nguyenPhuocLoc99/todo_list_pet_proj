@@ -4,11 +4,19 @@ import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class CreateTaskDto {
   @IsInt()
   @IsOptional()
-  userId?: number;
+  assigneeId?: number;
+
+  @IsString()
+  @IsOptional()
+  assigneeName?: string;
 
   @IsInt()
   @IsOptional()
-  group_id?: number;
+  groupId?: number;
+
+  @IsString()
+  @IsOptional()
+  groupName?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -34,11 +42,19 @@ export class CreateTaskDto {
 export class EditTaskDto {
   @IsInt()
   @IsOptional()
-  userId?: number;
+  assigneeId?: number;
+
+  @IsString()
+  @IsOptional()
+  assigneeName?: string;
 
   @IsInt()
   @IsOptional()
   groupId?: number;
+
+  @IsString()
+  @IsOptional()
+  groupName?: string;
 
   @IsString()
   @IsOptional()

@@ -25,12 +25,17 @@ export class TaskController {
     return this.taskService.getTaskById(taskId);
   }
 
+  @Get('')
+  getTasksList(@GetUser('id') userId: number) {
+    return this.taskService.getTasksList(userId);
+  }
+
   @Post('create')
   createTask(@Body() dto: CreateTaskDto, @GetUser('id') userId: number) {
     return this.taskService.createTask(dto, userId);
   }
 
-  @Post(':id/create')
+  @Post(':id')
   @Permissions('updateAccess')
   createTaskAccess(
     @Param('id', ParseIntPipe) taskId: number,
@@ -39,7 +44,7 @@ export class TaskController {
     return this.taskService.createTaskAccess(taskId, dto);
   }
 
-  @Patch(':id/info')
+  @Patch(':id')
   @Permissions(
     'updateInfo',
     'allowInProgress',

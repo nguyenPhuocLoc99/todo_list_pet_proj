@@ -19,6 +19,10 @@ export class CreateTaskGroupDto {
   @IsArray()
   @IsOptional()
   taskIds?: number[];
+
+  @IsString()
+  @IsOptional()
+  taskNames?: string;
 }
 
 export class EditTaskGroupDto {
@@ -33,6 +37,10 @@ export class EditTaskGroupDto {
   @IsArray()
   @IsOptional()
   taskIds?: number[];
+
+  @IsString()
+  @IsOptional()
+  taskNames?: string;
 }
 
 export class GroupAccessDto {

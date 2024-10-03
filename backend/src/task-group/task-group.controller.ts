@@ -25,6 +25,16 @@ export class TaskGroupController {
     return this.groupService.getGroupById(groupId);
   }
 
+  @Get('')
+  getGroupsList(@GetUser('id') userId: number) {
+    return this.groupService.getGroupsList(userId);
+  }
+
+  @Get(':id/tasks')
+  getGroupTasksList(@Param('id', ParseIntPipe) groupId: number) {
+    return this.groupService.getGroupTasksList(groupId);
+  }
+
   @Post('create')
   createGroup(@Body() dto: CreateTaskGroupDto, @GetUser('id') userId: number) {
     return this.groupService.createGroup(dto, userId);
