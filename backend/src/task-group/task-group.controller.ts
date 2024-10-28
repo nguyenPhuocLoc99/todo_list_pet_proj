@@ -12,7 +12,12 @@ import {
 import { TaskGroupService } from './task-group.service';
 import { GetUser, Permissions } from 'src/auth/decorator';
 import { JwtGuard, PermissonsGuard } from 'src/auth/guard';
-import { CreateTaskGroupDto, EditTaskGroupDto, GroupAccessDto } from './dto';
+import {
+  CreateTaskGroupDto,
+  EditTaskGroupDto,
+  GroupAccessDto,
+  GroupSuggestionsDto,
+} from './dto';
 
 @UseGuards(JwtGuard, PermissonsGuard)
 @Controller('groups')
@@ -79,5 +84,10 @@ export class TaskGroupController {
     @Body() dto: GroupAccessDto,
   ) {
     return this.groupService.deleteGroupAccess(taskId, dto);
+  }
+
+  @Get('suggestions')
+  groupSuggestions(@Body() dto: GroupSuggestionsDto) {
+    return this.groupService.groupSuggestions(dto);
   }
 }

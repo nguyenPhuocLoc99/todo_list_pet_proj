@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
+import TextWithTag from "../components/TextWithTag";
+import getAccessToken from "../hooks/getAccessToken";
 
 type GroupFormProps = {
   initData: any;
   onSubmit: (data: any) => void;
   isEditMode: boolean;
+};
+
+// tasks to taskNames
+const task2taskNames = (tasks: any) => {
+  if (tasks) return tasks.map((t: any) => t.taskName);
+  else return [];
 };
 
 function GroupForm({
@@ -14,21 +22,19 @@ function GroupForm({
   // Input state
   const [groupName, setGroupName] = useState(initData.groupName || "");
   const [description, setDescription] = useState(initData.description || "");
-  const [taskNames, setTaskNames] = useState(initData.taskNames || "");
+  const [taskNames, setTaskNames] = useState<string[]>(
+    task2taskNames(initData.tasks)
+  );
 
   useEffect(() => {
     setGroupName(initData.groupName || "");
     setDescription(initData.description || "");
 
-    if (initData.tasks) {
-      const taskNames = initData.tasks
-        .map((task: any) => task.taskName)
-        .join(", ");
-      setTaskNames(taskNames);
-    }
+    // Update taskNames based on initData.tasks
+    setTaskNames(task2taskNames(initData.tasks));
   }, [initData]);
 
-  // Handel submit
+  // Handle submit
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit({
@@ -38,10 +44,37 @@ function GroupForm({
     });
   };
 
+  const handleSuggest = (query: string) => {
+    if (!query) return [];
+    const accessToken = getAccessToken();
+
+    const getSuggestions = async (query: string) => {
+      const response = await fetch(`http://localhost:3333/tasks/suggestions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+      const content = await response.json();
+
+      if (response.ok) return content;
+      else return [];
+    };
+
+    return getSuggestions(query);
+  };
+
   return (
     <div className="row">
       <div className="col-12">
-        <form className="needs-validation" noValidate onSubmit={handleSubmit}>
+        <form
+          className="needs-validation"
+          id="groupForm"
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <div className="row g-3">
             <div className="col-6">
               <label htmlFor="groupName" className="form-label">
@@ -67,14 +100,13 @@ function GroupForm({
                 Task names
               </label>
               <div className="input-group has-validation">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="tasksId"
-                  value={taskNames}
-                  placeholder="e.g. Task1, Task2, Task3"
-                  onChange={(e) => setTaskNames(e.target.value)}
-                  disabled={!isEditMode}
+                <TextWithTag
+                  id="taskId"
+                  inputClass="form-control"
+                  initData={{ itemsList: taskNames }}
+                  placeHolder="Input a task name"
+                  suggestionFunc={handleSuggest}
+                  isEditMode={isEditMode}
                 />
               </div>
             </div>
@@ -99,7 +131,7 @@ function GroupForm({
             className="btn btn-primary mt-3"
             hidden={!isEditMode}
           >
-            Submit
+            Save
           </button>
         </form>
       </div>

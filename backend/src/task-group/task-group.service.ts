@@ -4,7 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateTaskGroupDto, EditTaskGroupDto, GroupAccessDto } from './dto';
+import {
+  CreateTaskGroupDto,
+  EditTaskGroupDto,
+  GroupAccessDto,
+  GroupSuggestionsDto,
+} from './dto';
 import { Permission } from '@prisma/client';
 
 @Injectable()
@@ -36,7 +41,9 @@ export class TaskGroupService {
         group: true,
       },
     });
-    return groupsList.map((group) => group.group);
+
+    const results = groupsList.map((group) => group.group);
+    return results;
   }
 
   // get Group tasks list
@@ -50,22 +57,18 @@ export class TaskGroupService {
 
   // create Group
   async createGroup(dto: CreateTaskGroupDto, userId: number) {
-    if (dto.taskNames) {
-      const taskNamesArray = dto.taskNames.split(`,[ ]?`);
-      const tasksList: Array<Object> = [];
-      for (const taskName of taskNamesArray) {
-        const task = await this.prisma.task.findFirst({
-          where: {
-            taskName,
-          },
-        });
+    const tasksList: Array<Object> = [];
+    for (const taskName of dto.taskNames) {
+      const task = await this.prisma.task.findFirst({
+        where: {
+          taskName,
+        },
+      });
 
-        if (task) tasksList.push({ id: task.id });
-      }
-
-      dto['tasks'] = { set: tasksList };
-      delete dto.taskNames;
+      if (task) tasksList.push({ id: task.id });
     }
+    dto['tasks'] = { connect: tasksList };
+    delete dto.taskNames;
 
     const newGroup = await this.prisma.taskGroup.create({
       data: {
@@ -121,9 +124,8 @@ export class TaskGroupService {
   // edit Group by id
   async editGroupById(groupId: number, dto: EditTaskGroupDto) {
     if (dto.taskNames) {
-      const taskNamesArray = dto.taskNames.split(`,[ ]?`);
       const tasksList: Array<Object> = [];
-      for (const taskName of taskNamesArray) {
+      for (const taskName of dto.taskNames) {
         const task = await this.prisma.task.findFirst({
           where: {
             taskName,
@@ -215,5 +217,22 @@ export class TaskGroupService {
       },
     });
     return { message: 'Access deleted' };
+  }
+
+  // get suggestions for task form
+  async groupSuggestions(dto: GroupSuggestionsDto) {
+    if (!dto.query) return null;
+
+    const suggestions = await this.prisma.taskGroup.findMany({
+      where: {
+        groupName: {
+          contains: dto.query,
+          mode: 'insensitive',
+        },
+      },
+      take: 5,
+    });
+
+    return suggestions.map((suggestion) => suggestion.groupName);
   }
 }

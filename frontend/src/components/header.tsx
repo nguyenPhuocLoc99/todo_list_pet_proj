@@ -1,18 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { useRenderContext } from "../context/RenderContext";
+import { useState } from "react";
+import photo from "../assets/logo_small.png";
 
 function Header() {
   // use useAuth custom hook
   const { isAuthenticated } = useAuth();
 
-  // render context
-  const { refreshApp } = useRenderContext();
+  // Redirect
+  const [toLogin, setToLogin] = useState(false);
 
   // Logout func
   const handleLogout = () => {
-    sessionStorage.removeItem("accessToken");
-    refreshApp();
+    document.cookie =
+      "accessToken=; ; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+    setToLogin(true);
   };
 
   // Not logged in header
@@ -61,14 +63,14 @@ function Header() {
           </li>
         </ul>
 
-        <form className="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+        {/* <form className="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
           <input
             type="search"
             className="form-control form-control-dark text-white bg-dark"
             placeholder="Search..."
             aria-label="Search"
           />
-        </form>
+        </form> */}
 
         <div className="text-end">
           <button className="btn btn-outline-light me-2" onClick={handleLogout}>
@@ -84,6 +86,14 @@ function Header() {
     );
   };
 
+  if (toLogin)
+    return (
+      <Navigate
+        to="/login"
+        state={{ message: "Logout success", alertType: 2 }}
+      />
+    );
+
   return (
     <header className="p-3 text-bg-dark">
       <div className="container">
@@ -93,7 +103,7 @@ function Header() {
             className="d-flex align-items-center text-white text-decoration-none me-3"
           >
             <img
-              src="logo_small.png"
+              src={photo}
               className="rounded-circle"
               width={50}
               height={50}

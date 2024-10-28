@@ -42,9 +42,9 @@ export class UserController {
   editUserById(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: EditUserDto,
-    @GetUser('isAdmin') is_admin: boolean,
+    @GetUser() user: boolean,
   ) {
-    return this.userService.editUserById(id, dto, is_admin);
+    return this.userService.editUserById(id, dto, user['is_admin'], user['id']);
   }
 
   @Delete(':id')

@@ -5,7 +5,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateTaskDto, TaskAccessDto, EditTaskDto, LogworkDto } from './dto';
+import {
+  CreateTaskDto,
+  TaskAccessDto,
+  EditTaskDto,
+  LogworkDto,
+  TaskSuggestionsDto,
+} from './dto';
 import { Permission, Status } from '@prisma/client';
 
 @Injectable()
@@ -43,6 +49,23 @@ export class TaskService {
       },
     });
     return tasksList.map((task) => task.task);
+  }
+
+  // Get suggestions for group form
+  async taskSuggestions(dto: TaskSuggestionsDto) {
+    if (!dto.query) return [];
+
+    const suggestions = await this.prisma.task.findMany({
+      where: {
+        taskName: {
+          contains: dto.query,
+          mode: 'insensitive',
+        },
+      },
+      take: 6,
+    });
+
+    return suggestions.map((suggestion) => suggestion.taskName);
   }
 
   // create Task
@@ -181,11 +204,13 @@ export class TaskService {
     if (dto.groupId && dto.groupId !== -1) {
       updateData['group'] = { connect: { id: dto.groupId } };
     } else delete updateData['groupId'];
+    delete updateData['groupName'];
 
     // Handle assignee
     if (dto.assigneeId && dto.assigneeId !== -1) {
       updateData['assignee'] = { connect: { id: dto.assigneeId } };
     } else delete updateData['assigneeId'];
+    delete updateData['assigneeName'];
 
     await this.prisma.task.update({
       where: {

@@ -116,3 +116,9 @@ main {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* Text with tags */
+.custom-tag-ul {
+  list-style-type: none;
+  padding-left: 0;
+}

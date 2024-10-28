@@ -12,7 +12,13 @@ import {
 import { TaskService } from './task.service';
 import { GetUser, Permissions } from 'src/auth/decorator';
 import { JwtGuard, PermissonsGuard } from 'src/auth/guard';
-import { CreateTaskDto, TaskAccessDto, EditTaskDto, LogworkDto } from './dto';
+import {
+  CreateTaskDto,
+  TaskAccessDto,
+  EditTaskDto,
+  LogworkDto,
+  TaskSuggestionsDto,
+} from './dto';
 
 @UseGuards(JwtGuard, PermissonsGuard)
 @Controller('tasks')
@@ -28,6 +34,11 @@ export class TaskController {
   @Get('')
   getTasksList(@GetUser('id') userId: number) {
     return this.taskService.getTasksList(userId);
+  }
+
+  @Post('suggestions')
+  taskSuggestions(@Body() dto: TaskSuggestionsDto) {
+    return this.taskService.taskSuggestions(dto);
   }
 
   @Post('create')
@@ -60,6 +71,7 @@ export class TaskController {
   ) {
     return this.taskService.editTaskById(taskId, dto, userId);
   }
+
 
   @Patch(':id/access')
   @Permissions('updateAccess')

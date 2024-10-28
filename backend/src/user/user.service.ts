@@ -12,6 +12,7 @@ import * as argon from 'argon2';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  // Get user by id
   async getUserById(userId: number, isAdmin: boolean) {
     if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
@@ -27,12 +28,13 @@ export class UserService {
     return user;
   }
 
+  // Create user
   async createUser(dto: UserDto, isAdmin: boolean) {
     if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');
     const user = await this.prisma.user.findFirst({
       where: {
-        loginName: dto.login_name,
+        loginName: dto.loginName,
       },
     });
 
@@ -42,27 +44,36 @@ export class UserService {
 
     await this.prisma.user.create({
       data: {
-        loginName: dto.login_name,
+        loginName: dto.loginName,
         hash,
         name: dto.name,
         email: dto.email,
         phone: dto.phone,
-        otherContacts: dto.other_contacts,
-        isAdmin: dto.is_admin,
+        otherContacts: dto.otherContacts,
+        isAdmin: dto.isAdmin,
       },
     });
     return { message: 'User created' };
   }
 
-  async editUserById(userid: number, dto: EditUserDto, isAdmin: boolean) {
-    if (!isAdmin)
+  // Edit user by id
+  async editUserById(
+    userId: number,
+    dto: EditUserDto,
+    isAdmin: boolean,
+    currentUserId: number,
+  ) {
+    console.log({ userId, currentUserId });
+    console.log(!isAdmin || userId !== currentUserId);
+    if (!isAdmin &&  userId !== currentUserId)
       throw new UnauthorizedException('User does not have permission');
 
     const user = await this.prisma.user.findFirst({
       where: {
-        id: userid,
+        id: userId,
       },
     });
+    console.log(dto);
 
     if (!user) throw new NotFoundException('User not found');
 
@@ -74,7 +85,7 @@ export class UserService {
 
     return this.prisma.user.update({
       where: {
-        id: userid,
+        id: userId,
       },
       data: {
         ...dto,
@@ -82,6 +93,7 @@ export class UserService {
     });
   }
 
+  // Delete user by id
   async deleteUserById(userId: number, isAdmin: boolean) {
     if (!isAdmin)
       throw new UnauthorizedException('User does not have permission');

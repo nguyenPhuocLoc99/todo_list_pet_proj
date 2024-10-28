@@ -29,7 +29,7 @@ export class PermissonsGuard implements CanActivate {
     // Get request
     const request = context.switchToHttp().getRequest();
 
-    const paramId: number = parseInt(request.params.id);
+    const paramId = parseInt(request.params.id);
     if (Number.isNaN(paramId)) throw new BadRequestException('No id found');
 
     const route: string = request.route.path;

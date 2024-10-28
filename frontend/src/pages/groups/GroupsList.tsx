@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import Alert from "../Alert";
+import Alert from "../../components/Alert";
 import React from "react";
+import Header from "../../components/Header";
+import getAccessToken from "../../hooks/getAccessToken";
+import useAuth from "../../hooks/useAuth";
 
 type Group = {
   id: number;
@@ -22,14 +25,22 @@ function GroupList() {
   // Get state from GroupDetail for 'Group deleted' alert
   const location = useLocation();
 
-  // Redirect on Add Group click
-  const [redirect, setRedirect] = useState(false);
+  // Redirect
+  const [toCreateGroup, setToCreateGroup] = useState(false);
+  const [toLogin, setToLogin] = useState(false);
+
+  // useAuth to refresh on not authenticated
+  const { isAuthenticated, isValidating } = useAuth();
+  useEffect(() => {
+    if (!isAuthenticated && !isValidating) setToLogin(true);
+  }, [isAuthenticated, isValidating]);
 
   useEffect(() => {
     const fetchGroupsList = async () => {
-      const accessToken = sessionStorage.getItem("accessToken");
+      const accessToken = getAccessToken();
 
       const response = await fetch("http://localhost:3333/groups", {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -58,21 +69,32 @@ function GroupList() {
                 {group.description ? group.description : "<No description>"}
               </p>
             </div>
-            <small className="opacity-50 text-nowrap">
-              Created: {new Date(group.createAt).toLocaleDateString()}
-            </small>
+
+            <div className="d-flex flex-column">
+              <small className="opacity-50 text-nowrap">
+                Created: {new Date(group.createAt).toLocaleDateString()}
+              </small>
+              <small className="opacity-50 text-nowrap">
+                Updated: {new Date(group.updateAt).toLocaleDateString()}
+              </small>
+            </div>
           </div>
         </a>
       </>
     );
   };
 
-  if (redirect) {
+  if (toCreateGroup) {
     return <Navigate to="/groups/create" />;
+  }
+
+  if (toLogin) {
+    return <Navigate to="/login" />;
   }
 
   return (
     <>
+      <Header />
       {location.state && (
         <Alert alertType={location.state.alertType}>
           {location.state.message}
@@ -99,7 +121,7 @@ function GroupList() {
             <Link
               to="/groups/create"
               className="btn btn-primary"
-              onClick={() => setRedirect(true)}
+              onClick={() => setToCreateGroup(true)}
             >
               Create Group
             </Link>

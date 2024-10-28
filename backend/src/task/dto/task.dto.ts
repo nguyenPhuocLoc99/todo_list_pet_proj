@@ -108,3 +108,9 @@ export class LogworkDto {
 
   taskId: number;
 }
+
+export class TaskSuggestionsDto {
+  @IsString()
+  @IsOptional()
+  query?: string;
+}

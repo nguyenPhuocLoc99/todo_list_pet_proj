@@ -9,7 +9,7 @@ const Alert = ({ children, alertType }: AlertProps) => {
   // Open state
   const [isOpen, setIsOpen] = useState(true);
 
-  // Colors list for the alert
+  // Colors list for the alert: blue, gray, green, red, yellow
   const colorsList = [
     "alert-primary",
     "alert-secondary",

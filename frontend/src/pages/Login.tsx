@@ -1,6 +1,8 @@
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import Alert from "./Alert";
+import Alert from "../components/Alert";
+import Header from "../components/Header";
+import useAuth from "../hooks/useAuth";
 
 const Login = () => {
   // Input states
@@ -15,8 +17,14 @@ const Login = () => {
   // Get state from navigate for 'Token expired' message
   const location = useLocation();
 
-  // Redirect to User
-  const [redirect, setRedirect] = useState(false);
+  // Redirect
+  const [toUser, setToUser] = useState(false);
+
+  // useAuth to redirect on authenticated
+  const { isAuthenticated, isValidating } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated && !isValidating) setToUser(true);
+  }, [isAuthenticated, isValidating]);
 
   // Submit func
   const handleSubmit = async (e: SyntheticEvent) => {
@@ -43,12 +51,12 @@ const Login = () => {
     const data = await response.json();
 
     if (data.accessToken) {
-      sessionStorage.setItem("accessToken", data.accessToken);
-      setRedirect(true);
+      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=1800`;
+      setToUser(true);
     } else setServerError(data.message);
   };
 
-  if (redirect) {
+  if (toUser) {
     return (
       <Navigate to="/user" state={{ message: "Login success", alertType: 2 }} />
     );
@@ -56,6 +64,7 @@ const Login = () => {
 
   return (
     <>
+      <Header />
       {location.state && (
         <Alert alertType={location.state.alertType}>
           {location.state.message}
@@ -73,6 +82,7 @@ const Login = () => {
             id="floatingInput"
             placeholder="name@example.com"
             onChange={(e) => setLoginName(e.target.value)}
+            autoComplete="username"
             required
           />
           <label htmlFor="floatingInput">Login name</label>

@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import Alert from "../Alert";
-import GroupForm from "./GroupForm";
+import Alert from "../../components/Alert";
+import TaskForm from "../../forms/TaskForm";
+import getAccessToken from "../../hooks/getAccessToken";
+import Header from "../../components/Header";
+import useAuth from "../../hooks/useAuth";
 
-function GroupDetail() {
+function TaskDetail() {
   // Name state
-  const [groupName, setGroupName] = useState("");
+  const [taskName, setTaskName] = useState("");
 
   // Initial task state
-  const [group, setGroup] = useState(null);
+  const [task, setTask] = useState(null);
 
   // Doing state
   const [isLoading, setIsLoading] = useState(false);
@@ -21,29 +24,37 @@ function GroupDetail() {
   // Error state
   const [error, setError] = useState("");
 
-  // Redirect to groups list on delete or edit success
-  const [redirect, setRedirect] = useState("");
+  // Redirect
+  const [toTasksList, setToTasksList] = useState("");
+  const [toLogin, setToLogin] = useState(false);
 
-  // get group id
+  // useAuth to refresh on not authenticated
+  const { isAuthenticated, isValidating } = useAuth();
+  useEffect(() => {
+    if (!isAuthenticated && !isValidating) setToLogin(true);
+  }, [isAuthenticated, isValidating]);
+
+  // get task id
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchGroup = async () => {
-      const token = sessionStorage.getItem("accessToken");
+    const fetchTask = async () => {
       setIsLoading(true);
 
-      const response = await fetch(`http://localhost:3333/groups/${id}`, {
+      const accessToken = getAccessToken();
+
+      const response = await fetch(`http://localhost:3333/tasks/${id}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       const content = await response.json();
-      setGroup(content);
-      setGroupName(content.groupName);
+      setTask(content);
+      setTaskName(content.taskName);
     };
 
-    fetchGroup();
+    fetchTask();
     setIsLoading(false);
   }, [id]);
 
@@ -52,52 +63,52 @@ function GroupDetail() {
   };
 
   const handleDelete = () => {
-    const deleteGroup = async () => {
+    const deleteTask = async () => {
       setIsDeleting(true);
       const confirmation = window.confirm(
-        "Are you sure you want to delete this group?"
+        "Are you sure you want to delete this task?"
       );
       if (!confirmation) return;
 
-      const token = sessionStorage.getItem("accessToken");
+      const accessToken = getAccessToken();
 
-      const response = await fetch(`http://localhost:3333/groups/${id}`, {
+      const response = await fetch(`http://localhost:3333/tasks/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      if (response.ok) setRedirect(`Group '${groupName}' deleted`);
-      else setError(`Failed to delete group! status: ${response.status}`);
+      if (response.ok) setToTasksList(`Task '${taskName}' deleted`);
+      else setError(`Failed to delete task!`);
     };
 
-    deleteGroup();
+    deleteTask();
     setIsDeleting(false);
   };
 
   const handleSave = (updatedTaskData: any) => {
     setIsSaving(true);
-    const token = sessionStorage.getItem("accessToken");
+    const accessToken = getAccessToken();
 
-    const updateGroup = async () => {
-      const response = await fetch(`http://localhost:3333/groups/${id}`, {
+    const updateTask = async () => {
+      const response = await fetch(`http://localhost:3333/tasks/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(updatedTaskData),
       });
 
       if (response.ok) {
         const content = await response.json();
-        setGroup(content);
-        setRedirect(`Group '${groupName}' updated`);
-      } else setError(`Failed to update group! status: ${response.status}`);
+        setTask(content);
+        setToTasksList(`Task '${taskName}' updated`);
+      } else setError(`Failed to update task!`);
     };
 
-    updateGroup();
+    updateTask();
     setIsSaving(false);
     setIsEditMode(false);
   };
@@ -107,31 +118,40 @@ function GroupDetail() {
   };
 
   if (isLoading)
-    return <div className="h1 ms-3 mt-3">Loading group details...</div>;
+    return <div className="h1 ms-3 mt-3">Loading task details...</div>;
 
   if (isSaving)
-    return <div className="h1 ms-3 mt-3">Saving group '{groupName}'...</div>;
+    return <div className="h1 ms-3 mt-3">Saving task '{taskName}'...</div>;
 
   if (isDeleting)
-    return <div className="h1 ms-3 mt-3">Deleting group '{groupName}'...</div>;
+    return <div className="h1 ms-3 mt-3">Deleting task '{taskName}'...</div>;
 
-  if (redirect)
+  if (toTasksList)
     return (
-      <Navigate to="/groups" state={{ message: redirect, alertType: 2 }} />
+      <Navigate to="/tasks" state={{ message: toTasksList, alertType: 2 }} />
+    );
+
+  if (toLogin)
+    return (
+      <Navigate
+        to="/login"
+        state={{ message: "Token expired", alertType: 3 }}
+      />
     );
 
   return (
     <>
+      <Header />
       {error && <Alert alertType={3}>{error}</Alert>}
       <div className="container mt-3">
-        {/*Header*/}
+        {/*Title*/}
         <div className="row">
           <div className="col-12">
-            <div className="d-flex justify-content-between align-item-center mb-3">
-              <Link to="/groups" className="btn btn-outline-dark me-2">
+            <div className="d-flex align-item-center mb-3">
+              <Link to="/tasks" className="btn btn-outline-dark me-2">
                 <i className="bi bi-arrow-left"></i>
               </Link>
-              <h4 className="m-0">Group Details</h4>
+              <h4 className="m-0">Task Details</h4>
               <div className="ms-auto">
                 {!isEditMode ? (
                   <>
@@ -155,12 +175,12 @@ function GroupDetail() {
           </div>
         </div>
 
-        {/* Form */}
-        {group && (
-          <GroupForm
-            initData={group}
-            isEditMode={isEditMode}
+        {/*Form*/}
+        {task && (
+          <TaskForm
+            initData={task}
             onSubmit={handleSave}
+            isEditMode={isEditMode}
           />
         )}
       </div>
@@ -168,4 +188,4 @@ function GroupDetail() {
   );
 }
 
-export default GroupDetail;
+export default TaskDetail;

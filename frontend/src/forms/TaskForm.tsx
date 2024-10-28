@@ -89,15 +89,13 @@ function TaskForm({
                   type="text"
                   className="form-control"
                   id="taskName"
-                  placeholder="Full name"
+                  placeholder="Task name"
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   disabled={!isEditMode}
                   required
                 />
-                <div className="invalid-feedback">
-                  Your fullname is required.
-                </div>
+                <div className="invalid-feedback">Task name is required.</div>
               </div>
             </div>
 
@@ -110,7 +108,7 @@ function TaskForm({
                   type="text"
                   className="form-control"
                   id="group"
-                  placeholder="Group name"
+                  placeholder="Input a task name"
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   disabled={!isEditMode}
@@ -181,6 +179,7 @@ function TaskForm({
                 type="text"
                 className="form-control"
                 id="assignee"
+                placeholder="Input a assignee name"
                 value={assigneeName}
                 onChange={(e) => setAssigneeName(e.target.value)}
                 disabled={!isEditMode}

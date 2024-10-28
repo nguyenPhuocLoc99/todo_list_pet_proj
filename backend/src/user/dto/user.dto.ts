@@ -3,7 +3,7 @@ import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class UserDto {
   @IsString()
   @IsNotEmpty()
-  login_name: string;
+  loginName: string;
 
   @IsString()
   @IsNotEmpty()
@@ -23,17 +23,17 @@ export class UserDto {
 
   @IsString()
   @IsOptional()
-  other_contacts?: string;
+  otherContacts?: string;
 
   @IsOptional()
   @IsBoolean()
-  is_admin?: boolean = false;
+  isAdmin?: boolean = false;
 }
 
 export class EditUserDto {
   @IsString()
   @IsOptional()
-  login_name?: string;
+  loginName?: string;
 
   @IsString()
   @IsOptional()
@@ -53,9 +53,9 @@ export class EditUserDto {
 
   @IsString()
   @IsOptional()
-  other_contacts?: string;
+  otherContacts?: string;
 
   @IsBoolean()
   @IsOptional()
-  is_admin?: boolean;
+  isAdmin?: boolean;
 }

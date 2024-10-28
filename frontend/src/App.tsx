@@ -1,18 +1,16 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import Header from "./components/Header";
-import Login from "./components/Login";
-import Home from "./components/Home";
-import Signup from "./components/Signup";
-import User from "./components/User";
-import { GroupList, GroupDetail, GroupCreate } from "./components/groups";
-import { TasksList, TaskDetail, TaskCreate } from "./components/tasks";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Signup from "./pages/Signup";
+import User from "./pages/User";
+import { GroupList, GroupDetail, GroupCreate } from "./pages/groups";
+import { TasksList, TaskDetail, TaskCreate } from "./pages/tasks";
 function App() {
   return (
     <>
       <BrowserRouter>
         <div className="d-flex flex-column min-vh-100">
-          <Header />
           <main className="flex-grow-1">
             <Routes>
               <Route path="/" element={<Home />} />

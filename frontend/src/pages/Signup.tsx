@@ -1,6 +1,7 @@
 import { SyntheticEvent, useState } from "react";
 import { Navigate } from "react-router-dom";
-import Alert from "./Alert";
+import Alert from "../components/Alert";
+import Header from "../components/Header";
 
 const Signup = () => {
   // Input states
@@ -79,6 +80,7 @@ const Signup = () => {
 
   return (
     <>
+      <Header />
       {errorMessage && <Alert alertType={3}>{errorMessage}</Alert>}
       <form onSubmit={handleSubmit} className="form-signin m-auto">
         <h1 className="mb-3 fw-normal">Sign up</h1>
@@ -114,14 +116,14 @@ const Signup = () => {
             type="fullname"
             className="form-control bottom-field"
             id="floatingFullname"
-            placeholder="Email"
+            placeholder="Fullname"
             onChange={(e) => setName(e.target.value)}
             required
           />
           <label htmlFor="floatingFullname">Fullname</label>
         </div>
 
-        <h1 className="h5 mb-3 fw-normal">Optional-fileds:</h1>
+        <h1 className="h5 mb-3 fw-normal">Optional fileds:</h1>
 
         <div className="form-floating">
           <input
