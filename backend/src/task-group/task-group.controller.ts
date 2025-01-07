@@ -40,6 +40,11 @@ export class TaskGroupController {
     return this.groupService.getGroupTasksList(groupId);
   }
 
+  @Post('suggestions')
+  groupSuggestions(@Body() dto: GroupSuggestionsDto) {
+    return this.groupService.groupSuggestions(dto);
+  }
+
   @Post('create')
   createGroup(@Body() dto: CreateTaskGroupDto, @GetUser('id') userId: number) {
     return this.groupService.createGroup(dto, userId);
@@ -84,10 +89,5 @@ export class TaskGroupController {
     @Body() dto: GroupAccessDto,
   ) {
     return this.groupService.deleteGroupAccess(taskId, dto);
-  }
-
-  @Get('suggestions')
-  groupSuggestions(@Body() dto: GroupSuggestionsDto) {
-    return this.groupService.groupSuggestions(dto);
   }
 }

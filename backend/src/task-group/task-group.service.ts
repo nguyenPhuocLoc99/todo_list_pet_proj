@@ -55,6 +55,23 @@ export class TaskGroupService {
     });
   }
 
+  // get suggestions for task form
+  async groupSuggestions(dto: GroupSuggestionsDto) {
+    if (!dto.query) return [];
+
+    const suggestions = await this.prisma.taskGroup.findMany({
+      where: {
+        groupName: {
+          contains: dto.query,
+          mode: 'insensitive',
+        },
+      },
+      take: 6,
+    });
+
+    return suggestions.map((suggestion) => suggestion.groupName);
+  }
+
   // create Group
   async createGroup(dto: CreateTaskGroupDto, userId: number) {
     const tasksList: Array<Object> = [];
@@ -217,22 +234,5 @@ export class TaskGroupService {
       },
     });
     return { message: 'Access deleted' };
-  }
-
-  // get suggestions for task form
-  async groupSuggestions(dto: GroupSuggestionsDto) {
-    if (!dto.query) return null;
-
-    const suggestions = await this.prisma.taskGroup.findMany({
-      where: {
-        groupName: {
-          contains: dto.query,
-          mode: 'insensitive',
-        },
-      },
-      take: 5,
-    });
-
-    return suggestions.map((suggestion) => suggestion.groupName);
   }
 }

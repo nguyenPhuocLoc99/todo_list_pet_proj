@@ -69,9 +69,9 @@ export class TaskController {
     @Body() dto: EditTaskDto,
     @GetUser('id') userId: number,
   ) {
+    console.log(dto);
     return this.taskService.editTaskById(taskId, dto, userId);
   }
-
 
   @Patch(':id/access')
   @Permissions('updateAccess')

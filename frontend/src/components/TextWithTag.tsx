@@ -66,7 +66,7 @@ const TextWithTag = ({
   const removeTag = (tag: string) => {
     // Update tasks list
     const index = initData.itemsList?.indexOf(tag);
-    if (index) initData.itemsList?.splice(index, 1);
+    if (typeof index === "number") initData.itemsList?.splice(index, 1);
 
     // Refresh the UI
     setTags((prevTags) => {
@@ -76,7 +76,7 @@ const TextWithTag = ({
   };
 
   return (
-    <div className=" row">
+    <div className="row relative-container">
       <textarea
         className={inputClass}
         id={id}
@@ -90,7 +90,7 @@ const TextWithTag = ({
 
       {showSuggestions && (
         <ul
-          className="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px"
+          className="dropdown-menu suggestion-ul d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px"
           data-bs-theme="light"
         >
           {suggestionsList.map((suggestion, index) => (

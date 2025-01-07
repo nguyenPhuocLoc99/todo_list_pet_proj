@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EditUserDto, UserDto } from './dto';
+import { EditUserDto, UserDto, UserSuggestionsDto } from './dto';
 import * as argon from 'argon2';
 
 @Injectable()
@@ -26,6 +26,23 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
 
     return user;
+  }
+
+  // User suggestions
+  async userSuggestions(dto: UserSuggestionsDto) {
+    if (!dto.query) return [];
+
+    const suggestions = await this.prisma.user.findMany({
+      where: {
+        name: {
+          contains: dto.query,
+          mode: 'insensitive',
+        },
+      },
+      take: 6,
+    });
+
+    return suggestions.map((suggestion) => suggestion.name);
   }
 
   // Create user
@@ -65,7 +82,7 @@ export class UserService {
   ) {
     console.log({ userId, currentUserId });
     console.log(!isAdmin || userId !== currentUserId);
-    if (!isAdmin &&  userId !== currentUserId)
+    if (!isAdmin && userId !== currentUserId)
       throw new UnauthorizedException('User does not have permission');
 
     const user = await this.prisma.user.findFirst({

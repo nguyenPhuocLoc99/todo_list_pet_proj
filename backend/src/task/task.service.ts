@@ -204,14 +204,35 @@ export class TaskService {
     if (dto.groupId && dto.groupId !== -1) {
       updateData['group'] = { connect: { id: dto.groupId } };
     } else delete updateData['groupId'];
-    delete updateData['groupName'];
+    
+    if (dto.groupName) {
+      const group = await this.prisma.taskGroup.findFirst({
+        where: {
+          groupName: dto.groupName,
+        },
+      });
+      if (!group) throw new NotFoundException('Group not found');
+      updateData['group'] = { connect: { id: group.id } };
+    }
+    if (dto.groupName) delete updateData['groupName'];
 
     // Handle assignee
     if (dto.assigneeId && dto.assigneeId !== -1) {
       updateData['assignee'] = { connect: { id: dto.assigneeId } };
     } else delete updateData['assigneeId'];
+
+    if (dto.assigneeName) {
+      const assignee = await this.prisma.user.findFirst({
+        where: {
+          name: dto.assigneeName,
+        },
+      });
+      if (!assignee) throw new NotFoundException('Assignee not found');
+      updateData['assignee'] = { connect: { id: assignee.id } };
+    }
     delete updateData['assigneeName'];
 
+    // Update the task and return a message
     await this.prisma.task.update({
       where: {
         id: taskId,

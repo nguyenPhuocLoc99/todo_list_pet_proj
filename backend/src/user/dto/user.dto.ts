@@ -59,3 +59,9 @@ export class EditUserDto {
   @IsOptional()
   isAdmin?: boolean;
 }
+
+export class UserSuggestionsDto {
+  @IsString()
+  @IsOptional()
+  query?: string;
+}

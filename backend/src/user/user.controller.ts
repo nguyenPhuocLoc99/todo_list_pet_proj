@@ -12,7 +12,7 @@ import {
 import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
-import { EditUserDto, UserDto } from './dto';
+import { EditUserDto, UserDto, UserSuggestionsDto } from './dto';
 import { UserService } from './user.service';
 
 @UseGuards(JwtGuard)
@@ -31,6 +31,11 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.userService.getUserById(id, is_admin);
+  }
+
+  @Post('suggestions')
+  userSuggestions(@Body() dto: UserSuggestionsDto) {
+    return this.userService.userSuggestions(dto);
   }
 
   @Post('create')

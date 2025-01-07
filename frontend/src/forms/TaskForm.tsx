@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import getAccessToken from "../hooks/getAccessToken";
 
 type TaskFormProps = {
   initData: any;
@@ -25,6 +26,13 @@ function TaskForm({
   const [startTime, setStartTime] = useState(initData.startTime || "");
   const [dueTime, setDueTime] = useState(initData.dueTime || "");
 
+  // Suggestions
+  const [showAssigneeHints, setShowAssigneeHints] = useState(false);
+  const [assigneeHintsList, setAssigneeHintsList] = useState<string[]>([]);
+  const [showGroupHints, setShowGroupHints] = useState(false);
+  const [groupHintsList, setGroupHintsList] = useState<string[]>([]);
+
+  // Init useEffect
   useEffect(() => {
     setTaskName(initData.taskName || "");
     setStatus(initData.status || "toDo");
@@ -51,6 +59,79 @@ function TaskForm({
     if (initData.dueTime) setDueTime(formatDatetime(initData.dueTime));
     else setDueTime("");
   }, [initData]);
+
+  // Assignee suggestion / hint function
+  useEffect(() => {
+    const fetchHints = async (query: string) => {
+      const accessToken = getAccessToken();
+      const response = await fetch(`http://localhost:3333/users/suggestions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+      const content = await response.json();
+
+      if (response.ok) setAssigneeHintsList(content);
+      else setAssigneeHintsList([]);
+    };
+
+    // Turn hints off if assigneeName is empty
+    if (!assigneeName || !assigneeHintsList.length) {
+      setShowAssigneeHints(false);
+      return;
+    }
+
+    // Fetch hints and show suggestions
+    fetchHints(assigneeName);
+    setShowAssigneeHints(true);
+
+    // Turn hints off if hints list has 1 (or less) option
+    // and it's already in the input field
+    if (
+      assigneeHintsList.includes(assigneeName) &&
+      assigneeHintsList.length < 2
+    ) {
+      setShowAssigneeHints(false);
+    }
+  }, [assigneeName, assigneeHintsList]);
+
+  // Group suggestion / hint function
+  useEffect(() => {
+    const fetchHints = async (query: string) => {
+      const accessToken = getAccessToken();
+      const response = await fetch(`http://localhost:3333/groups/suggestions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+      const content = await response.json();
+
+      if (response.ok) setGroupHintsList(content);
+      else setGroupHintsList([]);
+    };
+
+    // Turn hints off if groupName is empty
+    if (!groupName || !groupHintsList.length) {
+      setShowGroupHints(false);
+      return;
+    }
+
+    // Fetch hints and show suggestions
+    fetchHints(groupName);
+    setShowGroupHints(true);
+
+    // Turn hints off if hints list has 1 (or less) option
+    // and it's already in the input field
+    if (groupHintsList.includes(groupName) && groupHintsList.length < 2) {
+      setShowGroupHints(false);
+    }
+  }, [groupName, groupHintsList]);
 
   // Format datetime
   const formatDatetime = (time: string) => {
@@ -93,13 +174,14 @@ function TaskForm({
                   value={taskName}
                   onChange={(e) => setTaskName(e.target.value)}
                   disabled={!isEditMode}
+                  autoComplete="off"
                   required
                 />
                 <div className="invalid-feedback">Task name is required.</div>
               </div>
             </div>
 
-            <div className="col-6">
+            <div className="col-6 position-relative">
               <label htmlFor="group" className="form-label">
                 Group
               </label>
@@ -108,16 +190,30 @@ function TaskForm({
                   type="text"
                   className="form-control"
                   id="group"
-                  placeholder="Input a task name"
+                  placeholder="Input a group name"
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   disabled={!isEditMode}
+                  autoComplete="off"
                   required
                 />
-                <div className="invalid-feedback">
-                  Your username is required.
-                </div>
               </div>
+              {showGroupHints && (
+                <ul
+                  className="dropdown-menu suggestion-ul d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px"
+                  data-bs-theme="light"
+                >
+                  {groupHintsList.map((hint, index) => (
+                    <li
+                      className="dropdown-item round-2"
+                      key={index}
+                      onClick={() => setGroupName(hint)}
+                    >
+                      {hint}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="col-md-4">
@@ -168,10 +264,11 @@ function TaskForm({
                 value={estimation}
                 onChange={(e) => setEstimation(e.target.value)}
                 disabled={!isEditMode}
+                autoComplete="off"
               />
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-4 position-relative">
               <label htmlFor="assignee" className="form-label">
                 Assignee
               </label>
@@ -183,7 +280,24 @@ function TaskForm({
                 value={assigneeName}
                 onChange={(e) => setAssigneeName(e.target.value)}
                 disabled={!isEditMode}
+                autoComplete="off"
               />
+              {showAssigneeHints && (
+                <ul
+                  className="dropdown-menu suggestion-ul d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px"
+                  data-bs-theme="light"
+                >
+                  {assigneeHintsList.map((hint, index) => (
+                    <li
+                      className="dropdown-item round-2"
+                      key={index}
+                      onClick={() => setAssigneeName(hint)}
+                    >
+                      {hint}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="col-md-6">
@@ -198,6 +312,7 @@ function TaskForm({
                 onChange={(e) => setStartTime(e.target.value)}
                 onFocus={(e) => setStartTime(e.target.value)}
                 disabled={!isEditMode}
+                autoComplete="off"
               />
             </div>
 
@@ -213,6 +328,7 @@ function TaskForm({
                 onChange={(e) => setDueTime(e.target.value)}
                 onFocus={(e) => setDueTime(e.target.value)}
                 disabled={!isEditMode}
+                autoComplete="off"
               />
             </div>
 
